@@ -1,0 +1,17 @@
+<!-- @if(isset(Auth::user()->profilepicture))
+                    <li class="nav-item dropdown">
+                        @if(Auth::user()->profilepicture)
+                            <img src="{{ asset('profilepicture/' . Auth::user()->profilepicture) }}" alt="Profile Picture" style="width: 30px; height: 30px; border-radius: 50%;">
+                        @endif
+                    </a>
+
+                    </li>
+@endif -->
+
+billing id, item_id, ordername, quantity, price, user_id
+
+form = username, 
+
+orderproduct -- id, user_id, ordername, quantity, price
+orders -- id, user_id, item_id, totalprice
+<input type="number" onChange="change(this.value)" name="quantityInput_{{ $item->id }}" value="{{ $item->carts_quantity }}" min="0" max="{{ $item->carts_quantity }}">
