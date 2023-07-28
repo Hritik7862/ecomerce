@@ -1,16 +1,19 @@
 @extends('layouts.app')
+   
 @section('content')
-    <div class="container">
-        <h1>Billing Information</h1>
 
+<div class="container">
+        <h1>Billing Information</h1>
+       
         <div class="cart">
-            <table class="table">
-                <thead class="thead-light">
+            <table class="table table-bordered table-striped">
+                <thead class="">
                     <tr>
                         <th>Order Name</th>
                         <th>Quantity</th>
                         <th>Price per Item</th>
                         <th>Total Price</th>
+                        <!-- <th> User Address</th> -->
                     </tr>
                 </thead>
                 <tbody>
@@ -26,26 +29,45 @@
                             <td>{{ $item['price'] * $item['quantity'] }}</td>
                         </tr>
                         @php
-                            $subtotal += $item['price'] * $item['quantity'];
                             $totalItems += $item['quantity'];
+                            $subtotal += $item['price'] * $item['quantity'];
                         @endphp
                     @endforeach
+                    <div class="address">
+      
                     <tr>
-                        <td colspan="3">Subtotal:</td>
-                        <td>{{ $subtotal }}</td>
+                        <td colspan="3" class="text-danger"><strong>Subtotal:</strong></td>
+                        <td>{{ $subtotal }} </td>
                     </tr>
-                    <tr>
-                        <td colspan="3">Total Items:</td>
+                    <!-- <tr>
+                        <td colspan="3" class="text-danger"><strong>Total Items:</strong></td>
                         <td>{{ $totalItems }}</td>
-                    </tr>
+                    </tr> -->
                 </tbody>
             </table>
         </div>
 
-        <form action="/order" method="POST" style="text-align: center;" onsubmit="return confirm('Are you sure you want to place this order?')">
+        <form id="orderForm" action="/order/{{$address_id}}"  style="text-align: center;">
             @csrf
-            <button type="submit" class="btn btn-warning">Place Order</button>
+            <button type="button" class="btn btn-warning" onclick="confirmOrder()">Place Order</button>
         </form>
     </div>
+
+    <script>
+        function confirmOrder() {
+            Swal.fire({
+                title: 'Place Order',
+                text: 'Are you sure you want to place this order?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, place order',
+                cancelButtonText: 'No, cancel',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Submit the form
+                    document.getElementById('orderForm').submit();
+                }
+            });
+        }
+    </script>
 @endsection
-            

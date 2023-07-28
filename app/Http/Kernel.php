@@ -3,6 +3,9 @@
 namespace App\Http;
 
 // use App\Http\Middleware\Shopmid;
+use App\Http\Middleware\TrustHosts;
+use Illuminate\Http\Middleware\HandleCors;
+use Illuminate\Http\Middleware\TrustProxies;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 
 class Kernel extends HttpKernel
@@ -17,7 +20,6 @@ class Kernel extends HttpKernel
     protected $middleware = [
         // \App\Http\Middleware\TrustHosts::class,
         \App\Http\Middleware\TrustProxies::class,
-        \Illuminate\Http\Middleware\HandleCors::class,
         \App\Http\Middleware\PreventRequestsDuringMaintenance::class,
         \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
         \App\Http\Middleware\TrimStrings::class,
@@ -37,7 +39,8 @@ class Kernel extends HttpKernel
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,
             \App\Http\Middleware\VerifyCsrfToken::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
-            
+          //  \App\Http\Middleware\CheckUserIsNotAdmin::class,
+            // \App\Http\Middleware\AdminMiddleware::class
         ],
 
         'api' => [
@@ -72,7 +75,11 @@ class Kernel extends HttpKernel
         // 'checkuser' => Middleware\CheckUser::class,
         // \App\Http\Middleware\PreventBackHistory::class,
         'checkuser' => \App\Http\Middleware\CheckUser::class,
+        'admin' => \App\Http\Middleware\AdminMiddleware::class,
+        'notadmin' => \App\Http\Middleware\CheckUserIsNotAdmin::class,
 
 
     ];
 }
+
+

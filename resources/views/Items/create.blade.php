@@ -8,7 +8,7 @@
                     <div class="card-header">
                         <h3>
                             OrderManagement
-                            <a href="{{ url('items') }}" class="btn btn-primary btn-sm">Back</a>
+                            <a href="{{ url('items') }}" class="btn btn-warning btn-block custom-button shadow">Back</a>
                         </h3>
                     </div>
                     <div class="card-body">
@@ -16,7 +16,7 @@
                             @csrf
                             @method('post')
                             <div class="form-group row">
-                                <label for="itemName">Name</label>
+                                <label for="itemName">Item Name</label>
                                 <input type="text" name="itemName" class="form-control" required>
                             </div>
                             <div class="form-group row">
@@ -26,6 +26,7 @@
                             <div class="form-group row">
                                 <label for="itemType">Item Type</label>
                                 <input type="text" name="itemType" class="form-control" required>
+                            
                             </div>
                             <div class="form-group row">
                                 <label for="itemImage">Item Image</label>
@@ -38,6 +39,9 @@
                             <div class="form-group row">
                                 <label for="SellingPrice">Selling Price</label>
                                 <input type="number" name="SellingPrice" class="form-control" required>
+                                @error('SellingPrice')
+                                    <span class="text-danger">{{ $message }}</span>
+                                @enderror
                             </div>
                             <div class="form-group row">
                                 <label for="description">Description</label>
@@ -53,3 +57,5 @@
         </div>
     </div>
 @endsection
+
+

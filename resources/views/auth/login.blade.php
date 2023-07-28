@@ -13,12 +13,12 @@
                         @csrf
 
                         <div class="row mb-3">
-                            <label for="email" class="col-md-4 col-form-label text-md-end">{{ __('Email Address') }}</label>
+                            <label for="number" class="col-md-4 col-form-label text-md-end">{{ __('Mobile Number') }}</label>
 
                             <div class="col-md-6">
-                                <input id="email" type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ old('email') }}" required autocomplete="email" autofocus>
+                                <input id="number" type="number" class="form-control @error('mobilenumber') is-invalid @enderror" name="mobilenumber" value="{{ old('mobilenumber') }}" required autocomplete="number" autofocus pattern="[0-9]{10}" title="Mobile number should be exactly 10 digits">
 
-                                @error('email')
+                                @error('mobilenumber')
                                     <span class="invalid-feedback" role="alert">
                                         <strong>{{ $message }}</strong>
                                     </span>
@@ -57,14 +57,17 @@
                                 <button type="submit" class="btn btn-primary">
                                     {{ __('Login') }}
                                 </button>
-
+                              
                                 @if (Route::has('password.request'))
                                     <a class="btn btn-link" href="{{ route('password.request') }}">
                                         {{ __('Forgot Your Password?') }}
                                     </a>
+                                    
                                 @endif
                                 
                             </div>
+                            <!-- <a href="/update" >Update</a> -->
+
                         </div>
                     </form>
                 </div>
@@ -73,16 +76,5 @@
     </div>
 </div>  
 <!-- helloo -->
-@if (Route::has('register'))
-    <div class="row mb-0">
-        <div class="col-md-8 offset-md-4">
-            <a href="{{ $registerUrl }}" class="btn btn-link">
-                {{ __('Register') }}
-            </a>
-        </div>
-    </div>
-@endif
-
 
 @endsection
-

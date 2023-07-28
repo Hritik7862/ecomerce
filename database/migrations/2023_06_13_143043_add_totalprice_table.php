@@ -14,7 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::table('orderproduct', function (Blueprint $table) {
-            $table->bigInteger('totalprice')->nullable();
+            $table->bigInteger('totalprice')->nullable()->change();
         });
     }
 

@@ -34,18 +34,22 @@ class CheckUser
     {
         // dd(Auth::check());
 
-    if (!Auth::check()) {
     
-     return redirect('/home');
+        // $path = $request->getRequestUri();
+
+        // if (Auth::check()) {
+        //     if(($path == '/items' || $path =='/admin') && Auth::user()->is_admin){
+        //         return $next($request);
+        //     }
+        // }
+        // return abort('404');
     
-    } 
     //else {
     //     if ($request->is('home')) {
-    //         return redirect('/login');
+    //         return redirect('/login');   
     //     }
     // }
 
-    return $next($request);
 
 }
 }

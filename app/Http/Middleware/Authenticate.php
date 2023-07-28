@@ -15,16 +15,6 @@ class Authenticate extends Middleware
      */
     protected function redirectTo($request)
      {
-    //     if (! $request->expectsJson()) {
-    //         if ($request->user() && $request->user()->admin == 'yes') {
-    //             // User is an admin, redirect to the item page
-    //             return redirect('/item');
-    //         }
- 
-    //         return ;
-    //     }
-
-
-    // }
+    
  }
 }

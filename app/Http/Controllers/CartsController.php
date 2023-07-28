@@ -5,8 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\Item;
 use App\Models\User;
 use App\Models\Carts;
+use App\Models\Order;
 use App\Models\Orders;
+use App\Models\OrderProduct;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
 
 class CartsController extends Controller
@@ -41,9 +44,18 @@ class CartsController extends Controller
     {
         // dd($info);
         $data = Item::find($id);
-        $exists = Carts::where('item_id', $id)->exists();
+        $carts_data = Item::find($id)->carts;
 
-        if($exists){
+        $user_id = Auth::id();
+
+        $condition = [
+            ['item_id', '=', $id],
+            ['user_id', '=', $user_id]
+        ];
+
+        $exists = Carts::where($condition)->exists();
+
+        if($exists){    
             session()->flash('alert', 'This Item already exists');
             return redirect('/shop');
         }
@@ -55,7 +67,7 @@ class CartsController extends Controller
         $carts->carts_image = $data->itemImage;
         $carts->user_id = Auth::id();
         $carts->save();
-        return redirect('/shop');
+        return redirect('/shop')->with('success_message', 'Item Added Successfully');
     }
 
     /**
@@ -103,11 +115,16 @@ class CartsController extends Controller
         Carts::destroy($id);
         return redirect('/buy');
     }
-
-    public function orderbilling(Request $request){
+    public function orderbilling(Request $request,$address_id){
+        // dd($request->all());
+        if(isset($request->radiobtn)){
+            // $order=Order::fin
+        }
         //dd($request->all());
-        $info = Carts::all();
+        $user_id = Auth::id();
+        $info = Carts::all()->where('user_id',$user_id);
 
+          
 
        
         foreach($info as $value){
@@ -118,10 +135,13 @@ class CartsController extends Controller
                 'ordername'=>$value->items->itemName,
                 'price'=>$value->items->SellingPrice,
                 'quantity'=>$value->carts_quantity,
+
+
+          
             ];
-            // dd($add);
+            //dd($add);
         }
-        return view('shop.billing',compact('add'));
+        return view('shop.billing',compact('add','address_id'));
     }
 
     // public function ordersave(Request $request){
@@ -145,62 +165,77 @@ class CartsController extends Controller
     //     }
     //     Orders::insert($add);
     // }
-    public function ordersave(Request $request)
+    public function ordersave(Request $request,$address)
     {
-        $info = Carts::all();
-        
-        foreach($info as $key => $val){
-            
-        $datainfo = Carts::find($val->id)->items;
-        $datainfo->itemQuantity = $datainfo->itemQuantity - $val->carts_quantity;
-        $datainfo->save();
-        // $datainfo = carts::find($val->id)->items;
-        // $datainfo-> itemQuantity = $datainfo ->itemQuantity - $val -> carts_quantity;
-        // $datainfo ->save();
-    }
-
         $userId = Auth::id();
+        $info = Carts::where('user_id', $userId)->get();
+        $totalOrderPrice = 0;
         $add = [];
-    // $order = $request-> all();
+    
         foreach ($info as $value) {
+            $datainfo = $value->items;
+            $datainfo->itemQuantity = $datainfo->itemQuantity - $value->carts_quantity;
+            $datainfo->save();
+    
             $totalPrice = $value->items->SellingPrice * $value->carts_quantity;
     
             $add[] = [
                 'user_id' => $userId,
-                'ordername' => $value->items->itemName,
+                'ordername' => $value->items->itemName, 
                 'price' => $value->items->SellingPrice,
                 'quantity' => $value->carts_quantity,
                 'totalprice' => $totalPrice,
-                
             ];
-
+            $totalOrderPrice += $totalPrice;
         }
     
-        Orders::insert($add);
-        // Carts::d
-        // $cardsss=Carts::where('user_id','=',$userId);
-        // $cardsss->delete();
-        // return view('shop.order',compact('add'));
-        $cardss=Carts::where('user_id','=',$userId);
-        $cardss->delete();
-        return view('shop.order',compact('add'));
-
-
-        // Clear the cart after placing the order
-        Carts::truncate();  
+        $orderData = [
+            'order_number' => Order::randomNumber(),
+            'user_id' => $userId,
+            'total_payment' => $totalOrderPrice,
+            'total_items' => count($add),
+            'address_id'=>$address 
+        ];
+        // Orders::insert($add);
+        $insertedOrderData = Order::create($orderData);
     
-        //return redirect('/buy');
+        $orderProductData = [];
+        foreach ($info as $key => $value) {
+            $orderProductData[] = [
+                'order_id' => $insertedOrderData->id,
+                'product_id' => $value->item_id,
+                'per_price' => $value->carts_price,
+                'total_price' => $value->carts_price * $value->carts_quantity,
+                'number_of_products' => $value->carts_quantity,
+                'user_id'=>Auth::id()
+            ];
+        }
+    
+        OrderProduct::insert($orderProductData);
+    
+        $cards = Carts::where('user_id', $userId);
+        $cards->delete();
+        return redirect('/thankyou');
     }
     
-    public function updateQuantity(Request $request, $id)
+    public function updateQuantity(Request $request)
     {
-        // return response()->json($request->quantity);
+        $id = $_GET['id'];
+        $quantity = $_GET['quantity'];
         
-
-        $cards=Carts::find($request->id);
-        $cards->carts_quantity=$request->quantity;
+        $cards=Carts::find($id);
+        $cards->carts_quantity=$quantity;
         $cards->save();
        
 
 }
+
+function thankyou(){
+    return view('shop.order');
 }
+}
+
+
+
+
+

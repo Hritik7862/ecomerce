@@ -3,9 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Models\Item;
+use App\Models\User;
 use App\Models\Carts;
+use App\Models\Order;
+use App\Models\Address;
 use App\Models\Products;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+
 class BuyController extends Controller
 {
     /**
@@ -16,11 +23,20 @@ class BuyController extends Controller
     public function index()
     {
         $data = Carts::all();
-        // $info = Item::all();
-        // dd($data);
-        return view('shop.buy',compact('data'));
+        $address = Address::all()->where('user_id',Auth::id());
+        $address_all_ids=Order::all()->where('user_id',Auth::id());
+        $lastelement_id=[];
+        foreach($address_all_ids as $value){
+                array_push($lastelement_id,$value['address_id']);
+            }
+            $last_element=end($lastelement_id);
+        
+        return view('shop.buy',compact('data','address','last_element'));
     }
-
+    // 
+    // 
+    // 
+    // 
     /**
      * Show the form for creating a new resource.
      *
@@ -39,7 +55,7 @@ class BuyController extends Controller
      */
     public function store(Request $request)
     {
-        //
+
     }
 
     /**
@@ -61,7 +77,7 @@ class BuyController extends Controller
      */
     public function edit($id)
     {
-        //
+
     }
 
     /**
@@ -87,7 +103,15 @@ class BuyController extends Controller
         //
     }
  
+    public function address(Request $request, $id){
+        $data = User::find($id);
+          dd($data);
+        
+            $data->current_address = $request->current_address;
+            $data->save();
 
+        return redirect('/billing');
+    }
   
    
 }

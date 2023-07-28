@@ -13,5 +13,9 @@
         "postcss": "^8.1.14",
         "sass": "^1.56.1",
         "vite": "^4.0.0"
+    },
+    "dependencies": {
+        "jspdf": "^2.5.1",
+        "puppeteer": "^20.8.3"
     }
 }

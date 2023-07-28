@@ -2,17 +2,31 @@
 
 @section('content')
 
+
 <div class="container">
     <div class="row">
         <div class="col-md-12">
             <div class="card">
-                <div class="card-header">
+                <div class="card-header " >
                     <h3>
                         OrderManagement
-                        <a href="{{ url('items/create') }}" class="btn btn-primary btn-sm">Create</a>
+                        <a href="{{ url('items/create') }}" class="btn btn-warning btn-block custom-button shadow">Create</a>
+
                     </h3>
+                    
                 </div>
-                
+                @if (Session::has('success'))
+                <div class="container mt-3">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="alert alert-success">
+                                {{ Session::get('success') }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
+              
                 <table class="table table-bordered">
                     <thead>
                         <tr>
@@ -24,8 +38,8 @@
                             <th>PurchasingPrice</th>
                             <th>SellingPrice</th>
                             <th>Description</th>
-                            <th>Edit</th>
-                            <th>Delete</th>
+                            <th>Action</th>
+                           
                         </tr>
                     </thead>
                     <tbody>
@@ -49,11 +63,12 @@
                                 <a class="btn btn-success" href="{{ route('items.edit', $item->id) }}">Edit</a>
                             </td>
                             <td>
-                                <form action="{{ route('items.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this item?')">
-                                    <button type="submit" class="btn btn-danger">Delete</button>
-                                    @csrf
-                                    @method('DELETE')
-                                </form>
+                            <form action="{{ route('items.destroy', $item->id) }}" method="POST" 
+                             onsubmit="return confirmDelete(event)">
+                           <button type="submit" class="btn btn-danger">Delete</button>
+                            @csrf
+                           @method('DELETE')
+                        </form>
                             </td>
                         </tr>
                         @endforeach
@@ -63,5 +78,50 @@
         </div>
     </div>
 </div>
-  heloo ritik
+  
 @endsection
+
+<script>
+    function confirmDelete(event) {
+        event.preventDefault();
+        Swal.fire({
+            title: 'Are you sure?',
+            text: 'You will not be able to recover this item!',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'No, cancel!',
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                event.target.submit();
+                showSuccessMessage();
+            }
+        });
+    }
+
+    function showSuccessMessage() {
+        Swal.fire({
+            title: "Success!",
+            text: "The item has been deleted successfully.",
+            icon: "success",
+            showConfirmButton: false,
+            timer: 2000
+        });
+    }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

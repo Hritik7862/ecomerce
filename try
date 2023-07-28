@@ -171,6 +171,7 @@
 //use Illuminate\Support\Facades\DB;
 use App\Http\Middleware\Shopmid;
 
+use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
@@ -183,7 +184,7 @@ use App\Http\Controllers\OrdersController;
 use App\Http\Controllers\BillingController;
 use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\UserCustmarController;
-
+use Symfony\Component\Console\Input\Input;
 
 /*
 |--------------------------------------------------------------------------
@@ -242,20 +243,20 @@ Route::post('/updatequantity/{id}', [CartsController::class,'updateQuantity']);
 
 // Route::post('/billing/{id}', 'CartsController@updateQuantity')->name('billing.updateQuantity');
 // ajax
-// function updateQuantity(quantity,element){
-//     let final_id = element.id;
-//     let maxQuantity = parseInt(element.getAttribute('max'));
-//     if(quantity <1 || quantity < maxQuantity){
-//         alert('Quantity invalid')
-//         return;
-//     }
-//     $.ajaxSetup({
-//         headers:{
-//             'X-CSRF-TOKEN':$('meta[name="csrf-token"]').attr('content')
-//         }
-//     });
+function updateQuantity(quantity,element){
+    let final_id = element.id;
+    let maxQuantity = parseInt(element.getAttribute('max'));
+    if(quantity <1 || quantity < maxQuantity){
+        alert('Quantity invalid')
+        return;
+     }
+     $.ajaxSetup({
+        headers:{
+            'X-CSRF-TOKEN':$('meta[name="csrf-token"]').attr('content')
+         }
+    });
 
-// }
+ }
 // man ajax
 // function updateQuantity(quantity, element) {
 //     var final_id = element.id;
@@ -291,3 +292,1747 @@ Route::post('/updatequantity/{id}', [CartsController::class,'updateQuantity']);
 //         }
 //     });
 // }
+
+
+//<a href='shop/store/{{$item->id}}' onclick="return confirm('Are you sure you want to add this item to your cart?')" class="btn btn-warning addToCartBtn" data-name="{{ $item->itemName }}" data-quantity="1" data-price="{{ $item->SellingPrice }}">Add to Cart</a>
+// 'Are you sure you want to delete this item?'
+// <form action="{{ route('items.destroy', $item->id) }}" method="POST" 
+//       onsubmit="return confirmDelete(event)">
+//     <button type="submit" class="btn btn-danger">Delete</button>
+//     @csrf
+//     @method('DELETE')
+// </form>
+
+
+// <script>
+//     function confirmDelete(event) {
+//         event.preventDefault();
+//         Swal.fire({
+//             title: 'Are you sure?',
+//             text: 'You will not be able to recover this item!',
+//             icon: 'warning',
+//             showCancelButton: true,
+//             confirmButtonText: 'Yes, delete it!',
+//             cancelButtonText: 'No, cancel!',
+//             reverseButtons: true
+//         }).then((result) => {
+//             if (result.isConfirmed) {
+//                 event.target.submit();
+//             }
+//         });
+//     }
+// </script>
+// lgin controller
+// <?php
+
+// namespace App\Http\Controllers\Auth;
+
+// use App\Http\Controllers\Controller;
+// use App\Providers\RouteServiceProvider;
+// use Illuminate\Foundation\Auth\AuthenticatesUsers;
+// use Illuminate\Http\Request;
+// use Illuminate\Support\Facades\Auth;
+
+// class LoginController extends Controller
+// {
+//     use AuthenticatesUsers;
+
+//     /**
+//      * Where to redirect users after login.
+//      *
+//      * @var string
+//      */
+//     protected $redirectTo = RouteServiceProvider::HOME;
+
+//     /**
+//      * Get the login username to be used by the controller.
+//      *
+//      * @return string
+//      */
+//     public function username()
+//     {
+//         return 'mobilenumber'; 
+//     }
+//     /**
+//      * Handle a login request to the application.
+//      *
+//      * @param  \Illuminate\Http\Request  $request
+//      * @return \Illuminate\Http\Response
+//      */
+//     public function login(Request $request)
+//     {
+//         $this->validateLogin($request);
+
+//         if (Auth::attempt([$this->username() => $request->input($this->username()), 'password' => $request->input('password')])) {
+//             return $this->sendLoginResponse($request);
+//         }
+
+//         return $this->sendFailedLoginResponse($request);
+//     }
+
+//     /**
+//      *
+//      * @return void
+//      */
+//     public function __construct()
+//     {
+//         $this->middleware('guest')->except('logout');
+//     }
+// }
+// public function ordersave(Request $request)
+//     {
+//         $userId = Auth::id();
+//         $info = Carts::where('user_id', $userId)->get();
+//         $totalOrderPrice = 0;
+//         $add = [];
+    
+//         foreach ($info as $value) {
+//             $datainfo = $value->items;
+//             $datainfo->itemQuantity = $datainfo->itemQuantity - $value->carts_quantity;
+//             $datainfo->save();
+    
+//             $totalPrice = $value->items->SellingPrice * $value->carts_quantity;
+    
+//             $add[] = [
+//                 'user_id' => $userId,
+//                 'ordername' => $value->items->itemName, 
+//                 'price' => $value->items->SellingPrice,
+//                 'quantity' => $value->carts_quantity,
+//                 'totalprice' => $totalPrice,
+//             ];
+//             $totalOrderPrice += $totalPrice;
+//         }
+    
+//         $orderData = [
+//             'order_number' => Order::randomNumber(),
+//             'user_id' => $userId,
+//             'total_payment' => $totalOrderPrice,
+//             'total_items' => count($add),
+//         ];
+    
+//         Orders::insert($add);
+//         $insertedOrderData = Order::create($orderData);
+    
+//         $orderProductData = [];
+//         foreach ($info as $key => $value) {
+//             $orderProductData[] = [
+//                 'order_id' => $insertedOrderData->id,
+//                 'product_id' => $value->item_id,
+//                 'per_price' => $value->carts_price,
+//                 'total_price' => $value->carts_price * $value->carts_quantity,
+//                 'number_of_products' => $value->carts_quantity,
+//             ];
+//         }
+    
+//         OrderProduct::insert($orderProductData);
+    
+//         $cards = Carts::where('user_id', $userId);
+//         $cards->delete();
+    
+//         return view('shop.order', compact('add'));
+//     }
+//     // swet alert 
+//     @extends('layouts.app')
+
+// @section('shop')
+// @auth
+// <style>
+//     .card {
+//         background-color: light;
+//         height: 100%;
+//     }
+
+//     .card-img-top {
+//         width: 65px;
+//         height: 60px; 
+//         object-fit: cover;
+//     }
+
+//     .card-body {
+//         display: flex;
+//         flex-direction: column;
+//         justify-content: space-between;
+//         height: 100%;
+//     }
+
+//     .card-footer {
+//         margin-top: auto;
+//     }
+// </style>
+
+// <!-- Include SweetAlert library -->
+// <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+
+// <nav class="navbar navbar-expand-lg navbar-light bg-light">
+//     <div class="container">
+//         <a class="navbar-brand" href="">Shop</a>
+//         <a class="btn btn-warning" id="cartDetailsBtn" href="/buy" data-bs-target="#cartDetailsModal">
+//             <i class="fas fa-shopping-cart"></i> Carts
+//         </a>
+//     </div>
+// </nav>
+
+// <div class="container">
+//     <div class="row">
+//         @foreach($items as $item)
+//         <div class="col-md-4">
+//             <div class="card">
+//                 <img src="{{ asset('storage/images/'.$item->itemImage) }}" class="card-img-top" alt="Item Image">
+//                 <div class="card-body">
+//                     <div class="row">
+//                         <div class="col">
+//                             <strong>Order Name:</strong> {{ $item->itemName }}
+//                         </div>
+//                     </div>
+//                     <div class="row">
+//                         <div class="col">
+//                             <strong>Quantity:</strong> {{ $item->itemQuantity }}
+//                         </div>
+//                         <div class="col">
+//                             <strong>Price:</strong> {{ $item->SellingPrice }}
+//                         </div>
+//                     </div>
+//                 </div>
+//                 <div class="card-footer">
+//                     @if ($item->itemQuantity == 0)
+//                     <button class="btn btn-danger addTocartBtn" disabled>Out of Stock</button>
+//                     @else
+//                     <a href='shop/store/{{$item->id}}' onclick="addToCart(event)" class="btn btn-warning addToCartBtn" data-name="{{ $item->itemName }}" data-quantity="1" data-price="{{ $item->SellingPrice }}">Add to Cart</a>
+//                     @endif
+//                 </div>
+//             </div>
+//         </div>
+//         @endforeach
+//     </div>
+// </div>
+
+// <script>
+//     function addToCart(event) {
+//         event.preventDefault();
+        
+//         var name = event.target.getAttribute('data-name');
+//         var quantity = event.target.getAttribute('data-quantity');
+//         var price = event.target.getAttribute('data-price');
+
+//         swal({
+//             title: "Add to Cart",
+//             text: "Are you sure you want to add " + name + " to your cart?",
+//             icon: "warning",
+//             buttons: ["Cancel", "Add to Cart"],
+//             dangerMode: true,
+//         }).then(function (confirm) {
+//             if (confirm) {
+//                 window.location.replace("/shop");
+//             }
+//         });
+//     }
+// </script>
+
+// @endauth 
+// @endsection
+
+//<-- Inpute box with form ok -->
+//     @extends('layouts.app')
+
+// @section('shop')
+// @auth
+// <style>
+//     body {
+//         background-color: lightgray;
+//     }
+// </style>
+
+// <div class="container">
+//     <h1>Cart Details</h1>
+//     <input type="hidden" name="_token" value="{{ csrf_token() }}">
+    
+//     <ul id="cartItemsList">
+//         @foreach($data as $item)
+//         @if($item->user_id === auth()->user()->id)
+//         <li>
+//             <div class="card">
+//                 <div class="card-body">
+//                     <div class="row">
+//                         <div class="col-md-3">
+//                             <img src="{{ asset('storage/images/'.$item->carts_image) }}" class="card-img-top" alt="Item Image" style="width: 80px; height: auto">
+//                         </div>
+//                         <div class="col-md-6">
+//                             <h4 class="card-title">Order Name: {{ $item->items->itemName}}</h4>
+//                             <div class="input-group">
+//                                 Quantity:
+//                                 <input onchange="updateQuantity(this.value, this)" type="number" min="1" max="{{ $item->items->itemQuantity }}" name="quantityInput_{{ $item->id }}" id="{{$item->id}}" value="{{$item->carts_quantity}}">
+//                             </div>
+//                         </div>
+//                         <div class="col-md-3">
+//                             <p class="card-text">Price: {{ $item->carts_price }}</p>
+//                             <form action='carts/{{$item->id}}' method='post' onsubmit="confirmDelete(event, this)">
+//                                 @csrf
+//                                 @method('delete')
+//                                 <button type="submit" class="btn btn-danger"><i class="fas fa-trash"></i></button>
+//                             </form>
+//                         </div>
+//                     </div>
+//                 </div>
+//             </div>
+//         </li>
+//         <br>
+//         @endif
+//         @endforeach
+//     </ul>
+  
+//     <div class="text-center">
+//         @if(count($data->where('user_id', auth()->user()->id)) > 0)
+//         <a href="#" class="btn btn-warning d-block mx-auto d-lg-inline-block mb-3 mb-md-0 ml-md-auto mr-md-auto" data-bs-toggle="modal" data-bs-target="#orderModal" onclick="setOrderDetails()">Proceed to Buy</a>
+//         @endif
+//     </div>
+
+//     <!-- Modal -->
+//     <div class="modal fade" id="orderModal" tabindex="-1" aria-labelledby="orderModalLabel" aria-hidden="true">
+//         <div class="modal-dialog">
+//             <div class="modal-content">
+//                 <div class="modal-header">
+//                     <h5 class="modal-title" id="orderModalLabel">Order Confirmation</h5>
+//                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+//                 </div>
+//                 <div class="modal-body">
+//                     <div id="orderDetailsContainer"></div>
+//                     <form id="addressForm" action="/users" method="POST">
+//                         @csrf
+//                         <div class="row">
+//                             <div class="col-md-12">
+//                                 <input type="text" id="addressInput" name="current_address" placeholder="Enter your current address" style="width: 100%;" required/>
+//                             </div>
+//                         </div>
+//                     </form>
+//                 </div>
+//                 <div class="modal-footer">
+//                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+//                     <button type="submit" form="addressForm" class="btn btn-warning">Proceed to Billing</button>
+//                 </div>
+//             </div>
+//         </div>
+//     </div>
+// </div>
+
+// <script>
+//     function updateQuantity(quantity, element) {
+//         var final_id = element.id;
+//         var maxQuantity = parseInt(element.getAttribute('max'));
+
+//         if (quantity < 1 || quantity > maxQuantity) {
+//             alert("Invalid quantity!");
+//             return;
+//         }
+
+//         // Ajax code for updating quantity
+//         // ...
+//     }
+
+//     function confirmDelete(event, form) {
+//         event.preventDefault();
+
+//         Swal.fire({
+//             title: 'Confirm Delete',
+//             text: 'Are you sure you want to delete this cart item?',
+//             icon: 'warning',
+//             showCancelButton: true,
+//             confirmButtonText: 'Delete',
+//             cancelButtonText: 'Cancel'
+//         }).then((result) => {
+//             if (result.isConfirmed) {
+//                 form.submit();
+//             }
+//         });
+//     }
+    
+//     function setOrderDetails() {
+//         var orderContainer = document.querySelector('#cartItemsList');
+//         var orderItems = orderContainer.querySelectorAll('li');
+
+//         var orderHtml = '';
+//         orderItems.forEach(function(item) {
+//             var orderName = item.querySelector('.card-title').textContent.replace('Order Name: ', '');
+//             var orderPrice = item.querySelector('.card-text').textContent.replace('Price: ', '');
+//             var orderQuantity = item.querySelector('input[name^="quantityInput_"]').value;
+//             var orderImage = item.querySelector('.card-img-top').getAttribute('src');
+
+//             orderHtml += '<div class="row">';
+//             orderHtml += '<div class="col-md-3">';
+//             orderHtml += '<img src="' + orderImage + '" alt="Item Image" style="width: 80px; height: auto">';
+//             orderHtml += '</div>';
+//             orderHtml += '<div class="col-md-9">';
+//             orderHtml += '<p>Order Name: ' + orderName + '</p>';
+//             orderHtml += '<p>Price: ' + orderPrice + '</p>';
+//             orderHtml += '<p>Quantity: ' + orderQuantity + '</p>';
+//             orderHtml += '</div>';
+//             orderHtml += '</div>';
+//             orderHtml += '<hr>';
+//         });
+
+//         document.querySelector('#orderDetailsContainer').innerHTML = orderHtml;
+        
+//         // Clear the address input field
+//         document.getElementById('addressInput').value = '';
+//     }
+// </script>
+// @endauth
+// @endsection
+
+    //    shop.blade.php
+
+// @extends('layouts.app')
+
+// @section('shop')
+// @auth
+// <style>
+//     .card {
+//         background-color: light;
+//         height: 100%;
+//     }
+
+//     .card-img-top {
+//         width: 65px;
+//         height: 60px; 
+//         object-fit: cover;
+//     }
+
+//     .card-body {
+//         display: flex;
+//         flex-direction: column;
+//         justify-content: space-between;
+//         height: 100%;
+//     }
+
+//     .card-footer {
+//         margin-top: auto;
+//     }
+// </style>
+
+// <nav class="navbar navbar-expand-lg navbar-light bg-light">
+//     <div class="container">
+//         <a class="navbar-brand" href="">Shop</a>
+//         <a class="btn btn-warning" id="cartDetailsBtn" href="/buy" data-bs-target="#cartDetailsModal">
+//             <i class="fas fa-shopping-cart"></i> Carts
+//         </a>
+//     </div>
+// </nav>
+
+// <div class="container">
+//     <div class="row">
+//         @foreach($items as $item)
+//         <div class="col-md-4">
+//             <div class="card">
+//                 <img src="{{ asset('storage/images/'.$item->itemImage) }}" class="card-img-top" alt="Item Image">
+//                 <div class="card-body">
+//                     <div class="row">
+//                         <div class="col">
+//                             <strong>Order Name:</strong> {{ $item->itemName }}
+//                         </div>
+//                     </div>
+//                     <div class="row">
+//                         <div class="col">
+//                             <strong>Quantity:</strong> {{ $item->itemQuantity }}
+//                         </div>
+//                         <div class="col">
+//                             <strong>Price:</strong> {{ $item->SellingPrice }}
+//                         </div>
+//                     </div>
+//                 </div>
+//                 <div class="card-footer">
+//                     @if ($item->itemQuantity == 0)
+//                     <button class="btn btn-danger addTocartBtn" disabled>Out of Stock</button>
+//                     @else
+//                     <a href='shop/store/{{$item->id}}' onclick="return confirm('Are you sure you want to add this item to your cart?')" class="btn btn-warning addToCartBtn" data-name="{{ $item->itemName }}" data-quantity="1" data-price="{{ $item->SellingPrice }}">Add to Cart</a>
+//                     @endif
+//                 </div>
+//             </div>
+//         </div>
+//         @endforeach
+//     </div>
+// </div>
+
+// @endauth 
+// @endsection
+
+// @if (session('alert'))
+// <script>
+//     alert("{{ session('alert') }}");
+//     window.location.replace("/shop"); 
+// </script>
+// @endif
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// @extends('layouts.app')
+
+// @section('content')
+// @auth
+//   <div class="container">
+//     <h1>Order Details</h1>
+//     <a href="/shop" class="btn btn-warning btn-block custom-button shadow">{{ __('Go Shopping') }} <i class="fas fa-arrow-right"></i></a>
+
+//     <table class="table">
+//       <thead>
+//         <tr>
+//           <th>Order Number</th>
+//           <th>Date</th>
+//           <th>Quantity</th>
+//           <th>User Address</th>
+//           <th>Total payment</th>
+//           <th>Get Products</th>
+//         </tr>
+//       </thead>
+//       <tbody>
+//         @foreach($orderData as $order)
+//         <tr>
+//           <td>{{ $order->order_number }}</td>
+//           <td>{{ $order->date_of_order }}</td>
+//           <td>{{ $order->total_items }}</td>
+//           <td>{{ $order->users->address }}</td>
+//           <td>{{ $order->total_payment }}</td>
+//           <td><a href="javascript:void(0);" onclick="getOrderItems({{ $order->id }}, '{{ $order->order_number }}')" class="btn btn-warning"><i class="fas fa-eye"></i></a></td>
+//         </tr>
+//         @endforeach
+//       </tbody>
+//     </table>
+//   </div>
+// @endauth
+
+// <div class="container">
+//   <h1>Your Order Details</h1>
+//   <div id="getorder"></div>
+// </div>
+// @endsection
+
+// @section('scripts')
+// <script>
+//   function getOrderItems(orderId, orderNumber) {
+//     $.ajax({
+//       url: '/orderproduct/' + orderId + '/' + orderNumber,
+//       type: 'GET',
+//       dataType: 'json',
+//       success: function(data) {
+//         var html = '';
+
+//         for (let i = 0; i < data.length; i++) {
+//           html += '<p>Name: ' + data[i].item.itemName + '</p>';
+//           html += '<p>Quantity: ' + data[i].number_of_products + '</p>';
+//           html += '<p>TotalPrice: ' + data[i].total_price + '</p>';
+//           html += '<img src="/storage/images/' + data[i].item.itemImage + '" alt="Item Image">';
+
+//           // Add any additional information you want to display
+
+//         }
+
+//         $('#getorder').html(html);
+//       },
+//       error: function(xhr, status, error) {
+//         console.log(error);
+//       }
+//     });
+//   }
+// </script>
+// @endsection
+// <!-- <p>Name: {{ Auth::user()->name }}</p>
+//                                         <p>Email: {{ Auth::user()->email }}</p>
+//                                         <p>Mobile Number: {{ Auth::user()->mobilenumber }}</p>
+//                                         <p>Address: {{ Auth::user()->address }}</p> -->
+
+
+
+
+  buy.blade.php
+
+//   @extends('layouts.app')
+
+// @section('shop')
+// @auth
+
+// <style>
+//     body {
+//         background-color: lightgray;
+//     }
+// </style>
+
+
+// <div class="container">
+//     <h1>Cart Details</h1>
+//     <input type="hidden" name="_token" value="{{ csrf_token() }}">
+
+//     <ul id="cartItemsList">
+//         @foreach($data as $item)
+//         @if($item->user_id === auth()->user()->id)
+//         <li>
+//             <div class="card">
+//                 <div class="card-body">
+//                     <div class="row">
+//                         <div class="col-md-3">
+//                             <img src="{{ asset('storage/images/'.$item->carts_image) }}" class="card-img-top" alt="Item Image" style="width: 80px; height: auto">
+//                         </div>
+//                         <div class="col-md-6">
+//                             <h4 class="card-title">
+//                                 Order Name: {{ $item->items->itemName}}</h4>
+//                             <div class="input-group">
+//                                 Quantity:
+//                                 <input onchange="updateQuantity(this.value, this)" type="number" min="1" max="{{ $item->items->itemQuantity }}" name="quantityInput_{{ $item->id }}" id="{{$item->id}}" value="{{$item->carts_quantity}}">
+//                             </div>
+//                         </div>
+//                         <div class="col-md-3">
+//                             <p class="card-text">Price: {{ $item->carts_price }}</p>
+//                             <!-- Modified delete form -->
+//                             <form action='carts/{{$item->id}}' method='post' onsubmit="confirmDelete(event, this)">
+//                                 @csrf
+//                                 @method('delete')
+//                                 <button type="submit" class="btn btn-danger"><i class="fas fa-trash"></i></button>
+//                             </form>
+//                         </div>
+//                     </div>
+//                 </div>
+//             </div>
+//         </li>
+//         <br>
+//         @endif
+//         @endforeach
+//     </ul>
+
+//     <div class="text-center">
+//         @if(count($data->where('user_id', auth()->user()->id)) > 0)
+//         <a href="#" class="btn btn-warning d-block mx-auto d-lg-inline-block mb-3 mb-md-0 ml-md-auto mr-md-auto" data-bs-toggle="modal" data-bs-target="#orderModal" onclick="setOrderDetails()">Proceed to Buy</a>
+//         @endif
+//     </div>
+
+//     <!-- Modal -->
+//     <div class="modal fade" id="orderModal" tabindex="-1" aria-labelledby="orderModalLabel" aria-hidden="true">
+//         <div class="modal-dialog">
+//             <div class="modal-content">
+//                 <div class="modal-header">
+//                     <h5 class="modal-title" id="orderModalLabel">Order Confirmation</h5>
+//                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+//                 </div>
+//                 <div class="modal-body">
+//                     <div id="orderDetailsContainer"></div>
+
+//                     <div class="row">
+//                         <form action="/address-save" method="post">
+//                             @csrf
+//                             <div class="col-md-12 show_div"></div>
+//                         </form>
+//                     </div>
+
+//                     <div class="row">
+//                         <div class="col-md-12 mt-3">
+//                             <button class="btn btn-warning btn-sm mr-2" type="button" onclick="saveAddress()">Change your address</button>
+//                             <button type="button" class="btn btn-danger btn-sm" data-bs-dismiss="modal">Cancel</button>
+//                             <a class="btn btn-warning btn-sm ml-2" href="/billing" onclick="checkAddress()">Proceed to buy</a>
+//                         </div>
+//                     </div>
+
+//                 </div>
+//                 <div class="modal-footer"></div>
+//             </div>
+//         </div>
+//     </div>
+// </div>
+
+// <script>
+//     function saveAddress() {
+//         var html = `
+//         <div>
+//         @foreach($address as $value)
+//           <span>{{$value['street']}} {{$value['city'] }}  {{$value['state'] }} {{$value['pincode'] }}</span>
+//           <input type='radio' class='float-end' name='radiobtn' value='{{$value['id']}}'>
+//           <br>
+//         @endforeach
+
+//         <br>
+//         <span><b>Write your new address</b></span>
+//         <br>
+//         <input type="text" id="street" name="street" placeholder="Enter Street" style="width: 100%;" <?= (isset($address[0])) ? '' : 'required' ?>>
+//         <input type="text" id="addressInput" name="state" placeholder="Enter State" style="width: 100%;" <?= (isset($address[0])) ? '' : 'required' ?>>
+//         <input type="text" id="addressInput" name="city" placeholder="Enter city" style="width: 100%;" <?= (isset($address[0])) ? '' : 'required' ?>>
+//         <input type="number" id="addressInput" name="pincode" placeholder="Enter Pincode" style="width: 100%;" <?= (isset($address[0])) ? '' : 'required' ?>>
+//         <button type='submit' class="btn btn-warning">save</button>
+//         </div>
+//         `;
+//         $('.show_div').html(html);
+//     }
+
+//     function updateQuantity(quantity, element) {
+//         var final_id = element.id;
+//         var maxQuantity = parseInt(element.getAttribute('max'));
+
+//         if (quantity < 1 || quantity > maxQuantity) {
+//             alert("Invalid quantity!");
+//             return;
+//         }
+//     }
+
+//     function confirmDelete(event, form) {
+//         event.preventDefault();
+
+//         swal({
+//             title: "Are you sure?",
+//             text: "Once deleted, you will not be able to recover this item!",
+//             icon: "warning",
+//             buttons: true,
+//             dangerMode: true,
+//         }).then((willDelete) => {
+//             if (willDelete) {
+//                 form.submit();
+//             } else {
+//                 swal("Your item is safe.");
+//             }
+//         });
+//     }
+
+//     function setOrderDetails() {
+//         var orderContainer = document.querySelector('#cartItemsList');
+//         var orderItems = orderContainer.querySelectorAll('li');
+
+//         var orderHtml = '';
+//         orderItems.forEach(function(item) {
+//             var orderName = item.querySelector('.card-title').textContent.replace('Order Name: ', '');
+//             var orderPrice = item.querySelector('.card-text').textContent.replace('Price: ', '');
+//             var orderQuantity = item.querySelector('input[name^="quantityInput_"]').value;
+//             var orderImage = item.querySelector('.card-img-top').getAttribute('src');
+
+//             orderHtml += '<div class="row">';
+//             orderHtml += '<div class="col-md-3">';
+//             orderHtml += '<img src="' + orderImage + '" alt="Item Image" style="width: 80px; height: auto">';
+//             orderHtml += '</div>';
+//             orderHtml += '<div class="col-md-9">';
+//             orderHtml += '<p>Order Name: ' + orderName + '</p>';
+//             orderHtml += '<p>Price: ' + orderPrice + '</p>';
+//             orderHtml += '<p>Quantity: ' + orderQuantity + '</p>';
+//             orderHtml += '</div>';
+//             orderHtml += '</div>';
+//             orderHtml += '<hr>';
+//         });
+
+//         document.querySelector('#orderDetailsContainer').innerHTML = orderHtml;
+
+//         document.getElementById('addressInput').value = '';
+//     }
+
+//     function checkAddress() {
+//         var selectedAddress = document.querySelector('input[name="radiobtn"]:checked');
+//         if (!selectedAddress) {
+//             alert('Please select an address');
+//             return false;
+//         }
+//         return true;
+//     }
+// </script>
+
+// @endauth
+// @endsection
+
+
+
+ sho.blade.php
+
+
+
+
+address 
+var oldAddress = `
+    @foreach($address as $value)
+        <span>{{$value['street']}} {{$value['city']}} {{$value['state']}} {{$value['pincode']}}</span>
+        <span>
+            <input type='radio' class='float-end' name='radiobtn' value='{{$value['id']}}' name='radiodata'
+            {{ $value['id'] == $selectedAddressId ? 'checked' : '' }} onclick='getAddress(this.value)'/>
+        </span>
+        <br>
+    @endforeach
+`;
+
+pdf blank
+  
+@extends('layouts.app')
+
+@section('content')
+@auth
+  <div class="container">
+    <h1>Order Details</h1>
+    <a href="/shop" class="btn btn-warning btn-block custom-button shadow">{{ __('Go Shopping') }} <i class="fas fa-arrow-right"></i></a>
+
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Order Number</th>
+          <th>Date</th>
+          <th>Quantity</th>
+          <th>User Address</th>
+          <th>Total Payment</th>
+          <th>Get Products</th>
+        </tr>
+      </thead>
+      <tbody>
+        @foreach($orderData as $order)
+        <tr>
+          <td>{{ $order->order_number }}</td>
+          <td>{{ $order->date_of_order }}</td>
+          <td>{{ $order->total_items }}</td>
+          <td>
+            @if ($order->address)
+            {{ $order->address->address }}
+            @else
+            No address available
+            @endif
+          </td>
+          <td>{{ $order->total_payment }}</td>
+          <td><button class="show_order_detail btn btn-warning" onclick="showData(this.value)" value="{{ $order->id }}/{{ $order->order_number }}" data-bs-toggle="modal" data-bs-target="#showData"><i class="fas fa-eye"></i></button></td>
+        </tr>
+        @endforeach
+      </tbody>
+    </table>
+  </div>
+@endauth
+@endsection
+
+<!-- show detail model -->
+<div class="modal fade" id="showData" tabindex="-1" aria-labelledby="orderModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="orderModalLabel">Order Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body all_data" id="printableArea">
+        <!-- Modal content to be printed -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" onclick="printDiv('printableArea')">Print</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function showData(order_id) {
+    var id = order_id;
+    $.ajax({
+      url: `orderproduct/${id}`,
+      success: function (res) {
+        var data = res[0];
+        var count = res[0].length;
+        var orderNumber = res[1];
+        var address = res[2];
+
+        var orderDetailHtml = `
+        <div class="container">
+          <h1>Your Order Details</h1>
+          <div class="card bg-light mb-3">
+            <div class="card-header bg-secondary text-white">
+              Order Number: <span>${orderNumber}</span>
+            </div>
+            <div class="card-body">
+              <table class='table'>
+                <thead>
+                  <tr>
+                    <th>Item Name</th>
+                    <th>Item Quantity</th>
+                    <th>Item Price</th>
+                    <th>Total Price</th>
+                    <th>Item Image</th>
+                  </tr>
+                </thead>
+                <tbody>`;
+
+        for (var i = 0; i < count; i++) {
+          var totalPrice = parseFloat(data[i].total_price).toFixed(2);
+          var imagePath = `storage/images/${data[i].item.itemImage}`;
+          orderDetailHtml += `
+          <tr>
+            <td>${data[i].item.itemName}</td>
+            <td>${data[i].number_of_products}</td>
+            <td>${data[i].item.SellingPrice}</td>
+            <td>${totalPrice}</td>
+            <td><img src="${imagePath}" alt="Item Image" width="100px"></td>
+          </tr>`;
+        }
+
+        orderDetailHtml += `</tbody>
+              </table>
+            </div>
+          </div>
+        </div>`;
+
+        var addressHtml = `
+        <h2>User Address</h2>
+        <p>${address}</p>`;
+
+        var modalContent = `
+        <div class="modal-header">
+          <h5 class="modal-title" id="orderModalLabel">Order Details</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          ${orderDetailHtml}
+          ${addressHtml}
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" onclick="printDiv('printableArea')">Print</button>
+        </div>`;
+
+        $('#showData .modal-content').html(modalContent);
+      }
+    });
+  }
+
+  function printDiv(divName) {
+    var printContents = document.getElementById(divName);
+    var originalContents = document.body.innerHTML;
+
+    document.body.innerHTML = printContents;
+
+    window.print();
+
+    document.body.innerHTML = originalContents;
+  }
+</script>
+/done print model popup  /   
+@extends('layouts.app')
+
+@section('content')
+@auth
+
+  <div class="container">
+    <h1>Order Details</h1>
+    <a href="/shop" class="btn btn-warning btn-block custom-button shadow">{{ __('Go Shopping') }} <i class="fas fa-arrow-right"></i></a>
+
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Order Number</th>
+          <th>Date</th>
+          <th>Quantity</th>
+          <th>User Address</th>
+          <th>Total payment</th>
+          <th>Get Products</th>
+        </tr>
+      </thead>
+      <tbody>
+        @foreach($orderData as $order)
+        <tr>
+          <td>{{ $order->order_number }}</td>
+          <td>{{ $order->date_of_order }}</td>
+          <td>{{ $order->total_items }}</td>
+          <td>{{$order->address->street}},{{$order->address->city}},{{$order->address->state}},{{$order->address->pincode}}</td>
+          <td>{{ $order->total_payment }}</td>
+          <td><button class="show_order_detail btn btn-warning" onclick="showData(this.value, '{{ $order->address->street }},{{ $order->address->city }},{{ $order->address->state }},{{ $order->address->pincode }}')" value="{{ $order->id }}/{{ $order->order_number }}" data-bs-toggle="modal" data-bs-target="#showData" id="img"><i class="fas fa-eye"></i></button></td>
+        </tr>
+        @endforeach
+      </tbody>
+    </table>
+  </div>
+
+@endauth
+@endsection
+
+<!-- show detail model -->
+<div class="modal fade" id="showData" tabindex="-1" aria-labelledby="orderModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="orderModalLabel">Order Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body all_data">
+        <div class="container">
+          <h1>Your Order Details</h1>
+          <div class="card bg-light mb-3">
+            <div class="card-header bg-secondary text-white">
+              Order Number: <span id="orderNumber"></span>
+            </div>
+            <div class="card-body">
+              <table class='table' id="orderTable">
+                <thead>
+                  <tr>
+                    <th>Item Name</th>
+                    <th>Item Quantity</th>
+                    <th>Item Price</th>
+                    <th>Total Price</th>
+                    <th>Item Image</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="container">
+          <h2>User Address</h2>
+          <p id="addressData"></p>
+        </div>
+      </div>
+           <div class="modal-footer">
+       <button type="button" class="btn btn-primary" onclick="printBill()">Download</button>
+       <a id="downloadLink" class="btn btn-success" download>
+         <i class="fas fa-download"></i> Download
+  </a>
+</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function showData(order_id, addressData) {
+    var id = order_id;
+    $.ajax({
+      url: `orderproduct/${id}`,
+      success: function(res) {
+        console.log(res);
+        var data = res[0];
+        var count = res[0].length;
+        var orderNumber = res[1];
+
+        $('#orderNumber').text(orderNumber);
+
+        var tableBody = $('#orderTable tbody');
+        tableBody.empty();
+
+        for (var i = 0; i < count; i++) {
+          var totalPrice = parseFloat(data[i].total_price).toFixed(2);
+          var imagePath = `storage/images/${data[i].item.itemImage}`;
+          var row = `<tr>
+              <td>${data[i].item.itemName}</td>
+              <td>${data[i].number_of_products}</td>
+              <td>${data[i].item.SellingPrice}</td>
+              <td>${totalPrice}</td>
+              <td><img src="${imagePath}" alt="Item Image" width="100px"></td>
+            </tr>`;
+          tableBody.append(row);
+        }
+
+        $('#addressData').text(addressData);
+      }
+    });
+  }
+  
+  function printBill() {
+    window.print();
+  }
+</script>
+
+
+
+if (auth()->check() && auth()->user()->is_admin == 1) {
+            return in_array($request->path(), ['items', 'admin'])
+                ? $next($request)
+                : redirect('/admin'); 
+        }
+
+        return redirect('/login');
+    }
+
+
+     ___________________________________________
+    <?php
+
+namespace App\Http\Middleware;
+
+use Closure;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+
+class AdminMiddleware
+{
+    public function handle(Request $request, Closure $next)
+    {
+        $path = $request->getRequestUri();
+
+        if (Auth::check()) {
+            if(($path == '/items' || $path =='/admin' || $path =='/logout'||$path =='/items/create' ||$path=='/update-admin-status'  ) && Auth::user()->is_admin){
+                return $next($request);
+            }
+         
+        else{
+
+              // return $next($request);
+            return abort('404');
+              
+            
+        }
+        }
+        
+        return $next($request);
+
+    }
+}
+
+__________________;
+ 
+
+
+
+
+
+_____________________________________________________
+
+
+
+namespace App\Http\Middleware;
+
+use Closure;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+
+class AdminMiddleware
+{
+    public function handle(Request $request, Closure $next)
+    {
+        $path = $request->getPathInfo();
+
+        if (Auth::check()) {
+            $isAdmin = Auth::user()->is_admin;
+            if (($isAdmin && ($path == '/items' || $path == '/admin' || $path == '/logout' || $path == '/items/create' || $path == '/update-admin-status')) || 
+                ($isAdmin && strpos($path, '/items') === 0 && in_array($request->getMethod(), ['GET', 'POST', 'PUT', 'DELETE']))) {
+                return $next($request);
+            }
+        } else {
+            return redirect('/login'); 
+        }
+
+        return abort(404);
+    }
+}
+________________________________________________;
+
+
+
+admin Middleware____
+class AdminMiddleware
+{
+    public function handle(Request $request, Closure $next)
+    {
+        if (auth()->check() && auth()->user()->is_admin == 1) {
+            return $next($request);
+        }
+
+        return redirect('/items');
+    }
+}
+mostpafge----------;
+
+
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Item;
+use Illuminate\Http\Request;
+use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
+
+
+
+
+class ItemController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function __construct()
+    {
+
+        $this->middleware('admin')->only('index');
+    }
+     public function index(Item $item)
+    {   
+        //
+        // $data = Item::find(10)->carts;  
+        // dd($data);
+        $data = Item::all();
+        // dd($data);
+        return view('items.index', compact('data'));
+        // dd($data);
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function create()
+    {
+        return view('items.create');
+        
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    // public function store(Request $request)
+    // {
+       
+    //  $item= new Item;
+    //  $item->itemname=$request->itemName;
+    //  $item->itemQuantity=$request->itemQuantity;
+    //  $item->itemType=$request->itemType;
+    //  $item->description=$request->description;
+    //  $item->itemImage=$request->itemImage;
+    //  $item->PurchasingPrice=$request->PurchasingPrice;
+    //  $item->SellingPrice=$request->SellingPrice;
+
+
+   
+    // if ($request->hasFile('itemImage')) {
+    //     $image = $request->file('itemImage');
+    //     $imageName = time() . '.' . $image->getClientOriginalExtension();
+    //     $image->storeAs('public/images', $imageName);
+    //     $item->itemImage = $imageName;
+    // }
+     
+    //  $item->save();
+     
+    //  return redirect('items')->with('success', 'Item created successfully.');
+ 
+
+       
+       
+    // }
+    public function store(Request $request)
+{
+    $request->validate([
+        'itemName' => 'required',
+        'itemQuantity' => 'required|integer',
+        'itemType' => 'required',
+        'itemImage' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+        'PurchasingPrice' => 'required|numeric',
+        'SellingPrice' => 'required|numeric|min:' . ($request->input('PurchasingPrice') + 0.01),
+        'description' => 'required',
+    ]);
+
+    $item = new Item;
+    $item->itemname = $request->itemName;
+    $item->itemQuantity = $request->itemQuantity;
+    $item->itemType = $request->itemType;
+    $item->description = $request->description;
+    $item->PurchasingPrice = $request->PurchasingPrice;
+     $item->SellingPrice = $request->SellingPrice;
+
+    if ($request->hasFile('itemImage')) {
+        $image = $request->file('itemImage');
+        $imageName = time() . '.' . $image->getClientOriginalExtension();
+        $image->storeAs('public/images', $imageName);
+        $item->itemImage = $imageName;
+    }
+
+    $item->save();
+
+    return redirect('/items')->with('success','Item Added Successfully');
+    ;
+}
+
+   
+    
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function show($id)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function edit($id)
+    {
+        // echo $id;
+        $info = Item::find($id);
+        // dd($info);
+        return view('items.edit',compact('info'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request, $id)
+{
+    $request->validate([
+        'itemName' => 'required|string|max:255',
+        'itemQuantity' => 'required|integer|min:1',
+        'itemType' => 'required|string|max:255',
+        'PurchasingPrice' => 'required|numeric|min:0',
+        'SellingPrice' => 'required|numeric|min:0',
+        'description' => 'nullable|string|max:500',
+        'itemImage' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+    ]);
+
+    $info = Item::find($id);
+    if (!$info) {
+        return redirect('/items')->with(['error' => 'Item not found']);
+    }
+
+    $info->itemName = $request->itemName;
+    $info->itemQuantity = $request->itemQuantity;
+    $info->itemType = $request->itemType;
+    $info->PurchasingPrice = $request->PurchasingPrice;
+    $info->SellingPrice = $request->SellingPrice;
+    $info->description = $request->description;
+
+    if ($request->hasFile('itemImage')) {
+        if ($info->itemImage) {
+            Storage::delete('public/images/' . $info->itemImage);
+        }
+        $image = $request->file('itemImage');
+        $imageName = time() . '.' . $image->getClientOriginalExtension();
+        $image->storeAs('public/images', $imageName);
+        $info->itemImage = $imageName;
+    }
+
+    $info->save();
+    Session::flash('success', 'Item updated successfully.');
+
+    return redirect('/items');
+}
+
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy($id)
+    {
+      
+        // dd($id);
+            $item = Item::find($id);
+            if ($item) {
+                if ($item->itemImage) {
+                    Storage::delete('public/images/' . $item->itemImage);
+                }
+                $item->delete();
+
+                return redirect('items');
+            } else {
+                return redirect('items');
+            }
+        }
+      
+    }
+
+
+  ye  or <?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use Illuminate\Routing\Controller;
+use Illuminate\Foundation\Auth\User;
+
+class AdminController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index()
+    {
+     
+
+        $users = User::where('is_admin', false)->get();
+        return view('admin', compact('users'));
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function create()
+    {
+        //
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request)
+    {
+        //
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function show($id)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function edit($id)
+    {
+        //
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request, $id)
+    {
+        //
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy($id)
+    {
+        //
+    }
+    
+}
+ 
+
+
+
+
+
+
+// app/Http/Middleware/AdminMiddleware.php
+
+namespace App\Http\Middleware;
+
+use Closure;
+use Illuminate\Http\Request;
+
+class AdminMiddleware
+{
+    public function handle(Request $request, Closure $next)
+    {
+        if (auth()->check() && auth()->user()->is_admin == 1) {
+            return $next($request);
+        }
+
+        return redirect('/items');
+    }
+}
+
+
+
+
+
+
+
+@extends('layouts.app')
+
+@section('shop')
+@auth
+
+<style>
+.card {
+        background-color: light;
+        height: 100%;
+    }
+
+    .card-img-top {
+        width: 65px;
+        height: 60px;
+        object-fit: cover;
+    }
+
+    .card-body {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 100%;
+    }
+
+    .card-footer {
+        margin-top: auto;
+    }
+
+</style>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container">
+        <a class="navbar-brand" href="#">Shop</a>
+        <a class="btn btn-warning" id="cartDetailsBtn" href="/buy" data-bs-target="#cartDetailsModal">
+            <i class="fas fa-shopping-cart"></i> Carts
+            <span>{{ count($totalItems) }}</span>
+        </a>
+        <form class="d-flex ms-auto" id="searchForm">
+            <input class="form-control me-2" type="search" name="query" placeholder="Search" aria-label="Search" required>
+            <button class="btn btn-outline-primary" type="submit">Search</button>
+        </form>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    @if (session('success_message'))
+        <div class="alert alert-success" role="alert">
+            {{ session('success_message') }}
+        </div>
+    @endif
+    <div class="row" id="searchResults">
+        @foreach($items as $item)
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <img src="{{ asset('storage/images/'.$item->itemImage) }}" class="card-img-top" alt="Item Image">
+                    <div class="card-body">
+                        <div class="item-name">{{ $item->itemName }}</div>
+                        <div class="item-quantity"><strong>Quantity:</strong> {{ $item->itemQuantity }}</div>
+                        <div class="item-price"><strong>Price:</strong> {{ $item->SellingPrice }}</div>
+                    </div>
+                    <div class="card-footer">
+                        @if ($item->itemQuantity == 0)
+                            <button class="btn btn-danger addTocartBtn" disabled>Out of Stock</button>
+                        @else
+                            <a href='shop/store/{{$item->id}}'
+                               onclick="confirmAddToCart(event, this)"
+                               class="btn btn-warning addToCartBtn"
+                               data-name="{{ $item->itemName }}"
+                               data-quantity="1"
+                               data-price="{{ $item->SellingPrice }}"
+                            >
+                                Add to Cart
+                            </a>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        @endforeach
+    </div>
+</div>
+
+
+<script>
+    function confirmAddToCart(event, element) {
+        event.preventDefault();
+
+        var itemName = element.getAttribute('data-name');
+        var quantity = element.getAttribute('data-quantity');
+        var price = element.getAttribute('data-price');
+
+        Swal.fire({
+            title: "Add to Cart",
+            text: "Are you sure you want to add " + quantity + " " + itemName + " to your cart?",
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Yes, add to cart"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = element.getAttribute('href');
+                showSuccessMessage(itemName);
+            }
+        });
+    }
+
+   
+</script>
+
+@if (session('alert'))
+<script>
+    Swal.fire({
+        title: "Alert",
+        text: "{{ session('alert') }}",
+        icon: "info",
+        showConfirmButton: false,
+        timer: 2000
+    }).then(() => {
+        window.location.replace("/shop");
+    });
+</script>   
+@endif
+
+@endauth
+@endsection
+
+
+________________________
+this is shop.php reyliggg
+@extends('layouts.app')
+
+@section('shop')
+@auth
+
+<style>
+.card {
+        background-color: light;
+        height: 100%;
+    }
+
+    .card-img-top {
+        width: 65px;
+        height: 60px;
+        object-fit: cover;
+    }
+
+    .card-body {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 100%;
+    }
+
+    .card-footer {
+        margin-top: auto;
+    }
+
+</style>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container">
+        <a class="navbar-brand" href="#">Shop</a>
+        <a class="btn btn-warning" id="cartDetailsBtn" href="/buy" data-bs-target="#cartDetailsModal">
+            <i class="fas fa-shopping-cart"></i> Carts
+            <span>{{ count($totalItems) }}</span>
+        </a>
+        <form class="d-flex ms-auto" id="searchForm">
+            <input class="form-control me-2" type="search" name="query" placeholder="Search" aria-label="Search" required>
+            <button class="btn btn-outline-primary" type="submit">Search</button>
+        </form>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    @if (session('success_message'))
+        <div class="alert alert-success" role="alert">
+            {{ session('success_message') }}
+        </div>
+    @endif
+    <div class="row" id="searchResults">
+        @foreach($items as $item)
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <img src="{{ asset('storage/images/'.$item->itemImage) }}" class="card-img-top" alt="Item Image">
+                    <div class="card-body">
+                        <div class="item-name">{{ $item->itemName }}</div>
+                        <div class="item-quantity"><strong>Quantity:</strong> {{ $item->itemQuantity }}</div>
+                        <div class="item-price"><strong>Price:</strong> {{ $item->SellingPrice }}</div>
+                    </div>
+                    <div class="card-footer">
+                        @if ($item->itemQuantity == 0)
+                            <button class="btn btn-danger addTocartBtn" disabled>Out of Stock</button>
+                        @else
+                            <a href='shop/store/{{$item->id}}'
+                               onclick="confirmAddToCart(event, this)"
+                               class="btn btn-warning addToCartBtn"
+                               data-name="{{ $item->itemName }}"
+                               data-quantity="1"
+                               data-price="{{ $item->SellingPrice }}"
+                            >
+                                Add to Cart
+                            </a>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        @endforeach
+    </div>
+</div>
+
+
+<script>
+    function confirmAddToCart(event, element) {
+        event.preventDefault();
+
+        var itemName = element.getAttribute('data-name');
+        var quantity = element.getAttribute('data-quantity');
+        var price = element.getAttribute('data-price');
+
+        Swal.fire({
+            title: "Add to Cart",
+            text: "Are you sure you want to add " + quantity + " " + itemName + " to your cart?",
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Yes, add to cart"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = element.getAttribute('href');
+                showSuccessMessage(itemName);
+            }
+        });
+    }
+
+    document.getElementById('searchForm').addEventListener('submit', function (event) {
+        event.preventDefault();
+        var formData = new FormData(this);
+
+        fetch('shop.search', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            }
+        })
+        .then(response => response.text())
+        .then(data => {
+            document.querySelector('.row').innerHTML = data;
+        })
+        .catch(error => console.error('Error:', error));
+    });
+</script>
+
+@if (session('alert'))
+<script>
+    Swal.fire({
+        title: "Alert",
+        text: "{{ session('alert') }}",
+        icon: "info",
+        showConfirmButton: false,
+        timer: 2000
+    }).then(() => {
+        window.location.replace("/shop");
+    });
+</script>   
+@endif
+
+@endauth
+@endsection

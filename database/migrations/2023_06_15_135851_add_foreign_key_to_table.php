@@ -14,7 +14,8 @@ return new class extends Migration
     public function up()
     {
         Schema::table('carts', function (Blueprint $table) {
-            $table->foreign('user_id')
+            $table->unsignedBigInteger('user_id');
+            $table->foreign('user_id')->change()
                 ->references('id')
                 ->on('users')
                 ->onDelete('cascade');

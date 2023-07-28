@@ -4,8 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Item;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+
 
 
 
@@ -16,7 +19,12 @@ class ItemController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Item $item)
+    public function __construct()
+    {
+
+        $this->middleware('admin')->only('index');
+    }
+     public function index(Item $item)
     {   
         //
         // $data = Item::find(10)->carts;  
@@ -75,15 +83,14 @@ class ItemController extends Controller
     // }
     public function store(Request $request)
 {
-  
     $request->validate([
         'itemName' => 'required',
-        'itemQuantity' => 'required|numeric',
+        'itemQuantity' => 'required|integer',
         'itemType' => 'required',
-        'description' => 'required',
         'itemImage' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         'PurchasingPrice' => 'required|numeric',
-        'SellingPrice' => 'required|numeric',
+        'SellingPrice' => 'required|numeric|min:' . ($request->input('PurchasingPrice') + 0.01),
+        'description' => 'required',
     ]);
 
     $item = new Item;
@@ -103,7 +110,8 @@ class ItemController extends Controller
 
     $item->save();
 
-    return redirect('items');
+    return redirect('/items')->with('success','Item Added Successfully');
+    ;
 }
 
    
@@ -141,39 +149,45 @@ class ItemController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id)
-    {
+{
+    $request->validate([
+        'itemName' => 'required|string|max:255',
+        'itemQuantity' => 'required|integer|min:1',
+        'itemType' => 'required|string|max:255',
+        'PurchasingPrice' => 'required|numeric|min:0',
+        'SellingPrice' => 'required|numeric|min:0',
+        'description' => 'nullable|string|max:500',
+        'itemImage' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+    ]);
 
-        $info = Item::find($id);
-        $info->itemName = $request->itemName;
-        $info->itemQuantity = $request->itemQuantity;
-        $info->itemType = $request->itemType;
-        $info->PurchasingPrice = $request->PurchasingPrice;
-        $info->SellingPrice = $request->SellingPrice;
-        $info->description = $request->description;
-        // dd($request->itemImage);
-        // if ($request->hasFile('itemImage')) {
-        //     dd("hello");
-        //     $image = $request->file('itemImage');
-        //     $imageName = time() . '.' . $image->getClientOriginalExtension();
-        //     $image->storeAs('public/images', $imageName);
-        //     $info->itemImage = $imageName;
-        // }
-        if ($request->hasFile('itemImage')) {
-            if ($info->itemImage) {
-                Storage::delete('public/images/' . $info->itemImage);
-            }
-                        $image = $request->file('itemImage');
-            $imageName = time() . '.' . $image->getClientOriginalExtension();
-            $image->storeAs('public/images', $imageName);
-            $info->itemImage = $imageName;
-        }
-
-        $info->save();
-
-
-
-        return redirect('/items');
+    $info = Item::find($id);
+    if (!$info) {
+        return redirect('/items')->with(['error' => 'Item not found']);
     }
+
+    $info->itemName = $request->itemName;
+    $info->itemQuantity = $request->itemQuantity;
+    $info->itemType = $request->itemType;
+    $info->PurchasingPrice = $request->PurchasingPrice;
+    $info->SellingPrice = $request->SellingPrice;
+    $info->description = $request->description;
+
+    if ($request->hasFile('itemImage')) {
+        if ($info->itemImage) {
+            Storage::delete('public/images/' . $info->itemImage);
+        }
+        $image = $request->file('itemImage');
+        $imageName = time() . '.' . $image->getClientOriginalExtension();
+        $image->storeAs('public/images', $imageName);
+        $info->itemImage = $imageName;
+    }
+
+    $info->save();
+    Session::flash('success', 'Item updated successfully.');
+
+    return redirect('/items');
+}
+
 
     /**
      * Remove the specified resource from storage.
@@ -191,9 +205,13 @@ class ItemController extends Controller
                     Storage::delete('public/images/' . $item->itemImage);
                 }
                 $item->delete();
+
                 return redirect('items');
             } else {
                 return redirect('items');
             }
         }
+      
     }
+
+

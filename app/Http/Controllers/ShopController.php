@@ -1,35 +1,29 @@
 <?php
 
-namespace App\Http\Controllers;
-use Illuminate\Support\Facades\Schema;
 
 
-use Illuminate\Http\Request;
 
 namespace App\Http\Controllers;
 
 use App\Models\Item;
+use App\Models\Carts;
+use Illuminate\View\View;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema;
+
 
 class ShopController extends Controller
 {
     public function index()  
     {
-        // dd('hello');
-        // $items = Item::all();
-        // return view('shop.shop', compact('items'));
-            // Retrieve the items to be displayed on the shop page
-            // $items = Item::all();
-
-            // Pass the items to the shop view
-            // return view('shop.shop', ['items' => $items]);
-            // $items = Item::all(); // Fetch all the items from the database
-            // // dd($items);    
-           
-            // return view('shop.shop', compact('items'));
-            
-            $items = Item::all();
-            return view('shop.shop')->with('items', $items);
+      
+        $items = Item::all();
+        $totalItems = Carts::all()->where('user_id', Auth::id());
+        return view('shop.shop', compact('totalItems'))->with('items', $items);
             
             
     }
@@ -104,4 +98,19 @@ class ShopController extends Controller
         //
     }
     
-}
+    // public function search(Request $request)
+    // {
+    //     $query = $request->input('query');
+
+    //     // Perform the search query on your 'items' table using the 'itemName' field.
+    //     $items = Item::where('itemName', 'LIKE', '%' . $query . '%')->get();
+
+    //     return response()->json($items);
+    // }
+    }
+
+
+
+
+
+
